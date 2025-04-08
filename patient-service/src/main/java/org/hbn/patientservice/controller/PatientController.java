@@ -1,13 +1,14 @@
 package org.hbn.patientservice.controller;
 
+import jakarta.validation.Valid;
+import org.hbn.patientservice.dto.PatientRequestDTO;
 import org.hbn.patientservice.dto.PatientResponseDTO;
+import org.hbn.patientservice.model.Patient;
 import org.hbn.patientservice.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,5 +27,12 @@ public class PatientController {
     public ResponseEntity<List<PatientResponseDTO>> getPatients() {
         List<PatientResponseDTO> patientDTOs = patientService.getPatients();
         return new ResponseEntity<>(patientDTOs, HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<PatientResponseDTO> createPatient(@Valid @RequestBody PatientRequestDTO patientRequestDTO) {
+        PatientResponseDTO newPatient = patientService.createPatient(patientRequestDTO);
+
+        return new ResponseEntity<>(newPatient, HttpStatus.CREATED);
     }
 }
