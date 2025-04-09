@@ -3,11 +3,10 @@ PUT http://localhost:4000/patients/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
 
 {
-  "name" : "Subash",
-  "email" : "Haribalan@gmail.com",
-  "address" : "Villupuram vadakku pillar",
-  "dateOfBirth" : "2003-04-09",
-  "registeredDate" : "2025-04-08"
+  "name" : "John Doe Updated 1",
+  "email" : "test1234@gmail.com",
+  "address" : "123 main street nagarcoil",
+  "dateOfBirth" : "1995-09-09"
 }
 
 ###
