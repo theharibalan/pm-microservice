@@ -4,6 +4,7 @@ import org.hbn.patientservice.dto.PatientRequestDTO;
 import org.hbn.patientservice.dto.PatientResponseDTO;
 import org.hbn.patientservice.exception.EmailAlreadyExistException;
 import org.hbn.patientservice.exception.PatientNotFoundException;
+import org.hbn.patientservice.grpc.BillingServiceGrpcClient;
 import org.hbn.patientservice.mapper.PatientMapper;
 import org.hbn.patientservice.model.Patient;
 import org.hbn.patientservice.repository.PatientRepository;
@@ -18,8 +19,16 @@ import java.util.UUID;
 @Service
 public class PatientService {
 
-    @Autowired
+    //@Autowired
     private PatientRepository patientRepository;
+
+    private final BillingServiceGrpcClient billingServiceGrpcClient;
+
+    // we injected using constructor
+    public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient) {
+        this.billingServiceGrpcClient = billingServiceGrpcClient;
+        this.patientRepository = patientRepository;
+    }
 
     // we replace with autowired
 //    public PatientService(PatientRepository patientRepository) {
@@ -42,6 +51,8 @@ public class PatientService {
 
         Patient newPatient = patientRepository.save(
                 PatientMapper.toModel(patientRequestDTO));
+
+        billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(), newPatient.getName(), newPatient.getEmail());
 
         return PatientMapper.toDTO(newPatient);
     }
