@@ -2,7 +2,6 @@ package org.hbn.patientservice.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import jakarta.validation.groups.Default;
 import org.hbn.patientservice.dto.PatientRequestDTO;
 import org.hbn.patientservice.dto.PatientResponseDTO;
@@ -25,9 +24,9 @@ public class PatientController {
     @Autowired
     private PatientService patientService;
 
-//    public PatientController(PatientService patientService) {
-//        this.patientService = patientService;
-//    }
+    public PatientController(PatientService patientService) {
+        this.patientService = patientService;
+    }
 
     @GetMapping
     @Operation(summary = "Get Patients")

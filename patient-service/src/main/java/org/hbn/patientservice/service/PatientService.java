@@ -5,10 +5,10 @@ import org.hbn.patientservice.dto.PatientResponseDTO;
 import org.hbn.patientservice.exception.EmailAlreadyExistException;
 import org.hbn.patientservice.exception.PatientNotFoundException;
 import org.hbn.patientservice.grpc.BillingServiceGrpcClient;
+import org.hbn.patientservice.kafka.KafkaProducer;
 import org.hbn.patientservice.mapper.PatientMapper;
 import org.hbn.patientservice.model.Patient;
 import org.hbn.patientservice.repository.PatientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -19,15 +19,18 @@ import java.util.UUID;
 @Service
 public class PatientService {
 
-    //@Autowired
-    private PatientRepository patientRepository;
+    private final PatientRepository patientRepository;
 
     private final BillingServiceGrpcClient billingServiceGrpcClient;
+    private final KafkaProducer kafkaProducer;
 
     // we injected using constructor
-    public PatientService(PatientRepository patientRepository, BillingServiceGrpcClient billingServiceGrpcClient) {
+    public PatientService(PatientRepository patientRepository,
+                          BillingServiceGrpcClient billingServiceGrpcClient,
+                          KafkaProducer kafkaProducer ) {
         this.billingServiceGrpcClient = billingServiceGrpcClient;
         this.patientRepository = patientRepository;
+        this.kafkaProducer = kafkaProducer;
     }
 
     // we replace with autowired
@@ -46,13 +49,15 @@ public class PatientService {
     public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO) {
 
         if(patientRepository.existsByEmail(patientRequestDTO.getEmail())) {
-            throw new EmailAlreadyExistException("A Patient with the email address '" + patientRequestDTO.getEmail());
+            throw new EmailAlreadyExistException("A Patient with the email address " + " already exists" + patientRequestDTO.getEmail());
         }
 
         Patient newPatient = patientRepository.save(
                 PatientMapper.toModel(patientRequestDTO));
 
         billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(), newPatient.getName(), newPatient.getEmail());
+
+        kafkaProducer.sendEvent(newPatient);
 
         return PatientMapper.toDTO(newPatient);
     }
